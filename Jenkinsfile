@@ -61,16 +61,19 @@ pipeline {
             }
         }
         
-        stage('Deploy to AKS') {
+        stage('Update Helm Charts') {
             steps {
                 script {
-                    sh "az aks get-credentials --resource-group ${RESOURCE_GROUP} --name ${AKS_CLUSTER}"
                     sh """
-                    sed 's/latest/v${env.BUILD_ID}/g' kubernetes/deploy.yaml > output.yaml
-                    cat output.yaml
-                    kubectl apply -f output.yaml
-                    kubectl apply -f kubernetes/service.yaml
-                    rm output.yaml
+                    # values.yaml의 이미지 태그 업데이트
+                    sed -i 's/tag: "latest"/tag: "v${env.BUILD_NUMBER}"/g' helm/values.yaml
+                    
+                    # 변경사항 커밋 및 푸시
+                    git config --global user.email "jenkins@jenkins.com"
+                    git config --global user.name "Jenkins"
+                    git add helm/values.yaml
+                    git commit -m "Update image tag to v${env.BUILD_NUMBER}"
+                    git push origin HEAD:${BRANCH_NAME}
                     """
                 }
             }
