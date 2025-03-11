@@ -64,17 +64,19 @@ pipeline {
         stage('Update Helm Charts') {
             steps {
                 script {
-                    sh """
-                    # values.yaml의 이미지 태그 업데이트
-                    sed -i 's/tag: "latest"/tag: "v${env.BUILD_NUMBER}"/g' helm/values.yaml
-                    
-                    # 변경사항 커밋 및 푸시
-                    git config --global user.email "jenkins@jenkins.com"
-                    git config --global user.name "Jenkins"
-                    git add helm/values.yaml
-                    git commit -m "Update image tag to v${env.BUILD_NUMBER}"
-                    git push origin main
-                    """
+                    // Update values.yaml image tag
+                    sh "sed -i 's/tag: \"latest\"/tag: \"v${env.BUILD_NUMBER}\"/g' helm/values.yaml"
+
+                    // Commit and push changes to GitHub
+                    withCredentials([usernamePassword(credentialsId: 'Github-Cred', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                        sh """
+                            git config user.email "jenkins@jenkins.com"
+                            git config user.name "Jenkins"
+                            git add helm/values.yaml
+                            git commit -m "Update image tag to v${env.BUILD_NUMBER}"
+                            git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/YOUR_GITHUB_REPO.git main
+                        """
+                    }
                 }
             }
         }
