@@ -74,7 +74,7 @@ pipeline {
                             git config user.name "Jenkins"
                             git add helm/values.yaml
                             git commit -m "Update image tag to v${env.BUILD_NUMBER}"
-                            git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/YOUR_GITHUB_REPO.git main
+                            git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/binary-h0/product.git main
                         """
                     }
                 }
