@@ -73,7 +73,7 @@ pipeline {
                     git config --global user.name "Jenkins"
                     git add helm/values.yaml
                     git commit -m "Update image tag to v${env.BUILD_NUMBER}"
-                    git push origin HEAD:${BRANCH_NAME}
+                    git push origin main
                     """
                 }
             }
