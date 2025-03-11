@@ -68,14 +68,20 @@ pipeline {
                     sh "sed -i 's/tag: \"latest\"/tag: \"v${env.BUILD_NUMBER}\"/g' helm/values.yaml"
 
                     // Commit and push changes to GitHub
-                    withCredentials([usernamePassword(credentialsId: 'Github-Cred', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                    withCredentials([usernamePassword(credentialsId: 'Github-Cred', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
                         sh """
-                            git config user.email "jenkins@jenkins.com"
-                            git config user.name "Jenkins"
+                            git config --global user.email "jenkins@jenkins.com"
+                            git config --global user.name "Jenkins"
+                            git config --global credential.helper store
+                            echo "https://$GIT_USERNAME:$GIT_PASSWORD@github.com" > ~/.git-credentials
+
+                            git checkout main || git checkout -b main  # Ensure we're on the main branch
+                            git pull origin main  # Update local repo
                             git add helm/values.yaml
                             git commit -m "Update image tag to v${env.BUILD_NUMBER}"
-                            git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/binary-h0/product.git main
+                            git push origin main
                         """
+                        sh "rm -f ~/.git-credentials"  # Remove credentials file for security
                     }
                 }
             }
