@@ -81,7 +81,7 @@ pipeline {
                             git commit -m "Update image tag to v${env.BUILD_NUMBER}"
                             git push origin main
                         """
-                        sh "rm -f ~/.git-credentials"  # Remove credentials file for security
+                        sh "rm -f ~/.git-credentials"
                     }
                 }
             }
